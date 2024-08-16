@@ -1,0 +1,47 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import SearchForm from '../components/SearchForm.astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { HOMEPAGE_ARTICLE_LIMIT } from '../constants';
+import ArticleCard from '../components/ArticleCard.astro';
+import RecentArticle from '../components/RecentArticle.astro';
+
+const allBlogArticles: CollectionEntry<'blog'>[] = (
+  await getCollection('blog')
+).sort(
+  (a: CollectionEntry<'blog'>, b: CollectionEntry<'blog'>) =>
+    b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const mostRecentArticle: CollectionEntry<'blog'> = allBlogArticles[0];
+
+const otherArticles: CollectionEntry<'blog'>[] = allBlogArticles.slice(1);
+---
+
+<MainLayout>
+  <!-- Hero -->
+  <div class='grid grid-cols-1 gap-5 lg:grid-cols-2'>
+    <div>
+      <h1 class='text-5xl font-bold mt-4 mb-5 leading-tight xl:text-5xl'>
+        Articles, Stories & Tutorials for Tech People
+      </h1>
+      <p class='text-gray-700 leading-relaxed mb-6'>
+        Explore a world of tech knowledge with articles, stories, and tutorials
+        crafted for curious minds. Whether you're a developer, designer, or tech
+        enthusiast, find the insights and guidance you need to level up your
+        skills.
+      </p>
+      <SearchForm />
+    </div>
+    <RecentArticle article={mostRecentArticle} />
+  </div>
+
+  <!-- All Articles -->
+  <div class='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+    {
+      otherArticles
+        .slice(0, HOMEPAGE_ARTICLE_LIMIT)
+        .map((article) => <ArticleCard article={article} />)
+    }
+  </div>
+</MainLayout>

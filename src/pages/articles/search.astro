@@ -1,0 +1,42 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import MainLayout from '../../layouts/MainLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import SearchForm from '../../components/SearchForm.astro';
+
+const query: string | null = Astro.url.searchParams.get('query');
+
+const allBlogArticles: CollectionEntry<'blog'>[] = await getCollection('blog');
+
+const searchResults = allBlogArticles.filter((article) => {
+  const titleMatch: boolean = article.data.title
+    .toLowerCase()
+    .includes(query!.toLowerCase());
+  const bodyMatch: boolean = article.body
+    .toLowerCase()
+    .includes(query!.toLowerCase());
+  const slugMatch: boolean = article.slug
+    .toLowerCase()
+    .includes(query!.toLowerCase());
+  const tagMatch: boolean = article.data.tags.some((tag: string) =>
+    tag.toLowerCase().includes(query!.toLowerCase())
+  );
+  return titleMatch || bodyMatch || slugMatch || tagMatch;
+});
+---
+
+<MainLayout>
+  <a
+    href='/articles'
+    class='inline-block bg-gray-100 p-2 mb-6 hover:bg-indigo-500 hover:text-white'
+    >All Articles</a
+  >
+
+  <SearchForm query={query} />
+
+  <h1 class='text-2xl my-6'>Results For <strong>{query}</strong></h1>
+
+  <div class='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+    {searchResults.map((article) => <ArticleCard article={article} />)}
+  </div>
+</MainLayout>
